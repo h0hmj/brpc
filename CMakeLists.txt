@@ -121,7 +121,7 @@ set(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} ${DEBUG_SYMBOL} ${THRIFT_CPP_FLAG}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CPP_FLAGS} -O2 -pipe -Wall -W -fPIC -fstrict-aliasing -Wno-invalid-offsetof -Wno-unused-parameter -fno-omit-frame-pointer")
 set(CMAKE_C_FLAGS "${CMAKE_CPP_FLAGS} -O2 -pipe -Wall -W -fPIC -fstrict-aliasing -Wno-unused-parameter -fno-omit-frame-pointer")
 
-macro(use_cxx11)
+macro(use_cxx17)
 if(CMAKE_VERSION VERSION_LESS "3.1.3")
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -130,12 +130,12 @@ if(CMAKE_VERSION VERSION_LESS "3.1.3")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     endif()
 else()
-    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
-endmacro(use_cxx11)
+endmacro(use_cxx17)
 
-use_cxx11()
+use_cxx17()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     #required by butil/crc32.cc to boost performance for 10x
@@ -226,7 +226,12 @@ set(DYNAMIC_LIB
     ${THRIFT_LIB}
     ${OPENSSL_CRYPTO_LIBRARY}
     dl
-    z)
+    z
+    absl_hash
+    absl_raw_hash_set
+    absl_spinlock_wait
+    absl_log_internal_check_op
+    absl_log_internal_message)
 
 if(WITH_MESALINK)
     list(APPEND DYNAMIC_LIB ${MESALINK_LIB})

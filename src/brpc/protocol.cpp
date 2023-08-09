@@ -16,16 +16,6 @@
 // under the License.
 
 
-// Since kDefaultTotalBytesLimit is private, we need some hacks to get the limit.
-// Works for pb 2.4, 2.6, 3.0
-#define private public
-#include <google/protobuf/io/coded_stream.h>
-const int PB_TOTAL_BYETS_LIMITS_RAW =
-    google::protobuf::io::CodedInputStream::kDefaultTotalBytesLimit;
-const uint64_t PB_TOTAL_BYETS_LIMITS =
-    PB_TOTAL_BYETS_LIMITS_RAW < 0 ? (uint64_t)-1LL : PB_TOTAL_BYETS_LIMITS_RAW;
-#undef private
-
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <google/protobuf/text_format.h>
 #include <gflags/gflags.h>
@@ -200,16 +190,6 @@ BUTIL_FORCE_INLINE bool ParsePbFromZeroCopyStreamInlined(
     google::protobuf::Message* msg,
     google::protobuf::io::ZeroCopyInputStream* input) {
     google::protobuf::io::CodedInputStream decoder(input);
-    // Remove the limit inside pb so that it never conflicts with -max_body_size 
-    // According to source code of pb, SetTotalBytesLimit is not a simple set,
-    // avoid calling the function when the limit is definitely unreached.
-    if (PB_TOTAL_BYETS_LIMITS < FLAGS_max_body_size) {
-#if GOOGLE_PROTOBUF_VERSION >= 3006000
-        decoder.SetTotalBytesLimit(INT_MAX);
-#else
-        decoder.SetTotalBytesLimit(INT_MAX, -1);
-#endif
-    }
     return msg->ParseFromCodedStream(&decoder) && decoder.ConsumedEntireMessage();
 }
 
